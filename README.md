@@ -1,6 +1,6 @@
 # Banking System
 
-🚧`em construção`🚧
+`finalizado`
 
 ## 🖋️ Descrição
 - O presente projeto consiste em um sistema bancário desenvolvido na linguagem de programação Python, com o objetivo de treinar conceitos básicos da linguagem, como laços de repetição e de condição, bem como manipulação de strings.
@@ -16,3 +16,7 @@
 `Sacar`: a função de saque permite que o usuário realiza um saque em sua conta bancária, com limite de 3 saques diários e valor máximo de R$500,00 por saque. Caso o usuário não possua saldo suficiente para realizar o saque, uma mensagem será exibida e a operação será cancelada;
 
   ![image](https://github.com/Maria-Faria/Banking_System/assets/114308727/53571834-45b5-4396-b8cf-727795495aa4)
+
+`Exibir Extrato`: a função de exibir extrato imprime na tela todos os depósitos e saques realizados pelo usuário, além do saldo atual disponível em sua conta bancária.
+
+  ![image](https://github.com/Maria-Faria/Banking_System/assets/114308727/86c9c3a2-62b0-4eb5-ac71-88fcbecd0d0f)
