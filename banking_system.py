@@ -25,7 +25,6 @@ date_last_withdrawal = ""
 balance = 0
 
 while(choice != 4):
-    time.sleep(2)
     choice = int(input(menu))
     print(line)
 
@@ -38,11 +37,13 @@ while(choice != 4):
         while(value <= 0):
             value = float(input("Valor inválido! Tente novamente: R$ "))
 
-        print("Depósito realizado!")
+        print("\nDepósito realizado!")
         
         deposits += f"R${value:.2f}; "
         balance += value
     
+        time.sleep(2)
+
     elif(choice == 2):
 
         if(date_last_withdrawal != date.today()):
@@ -65,12 +66,25 @@ while(choice != 4):
                 value = float(input("""\nValor inválido! O limite máximo para saque é de R$500,00! Tente novamente: R$"""))
 
             if(value > balance):
-                print("Você não possui saldo suficiente para realizar o depósito!")
+                print("\nVocê não possui saldo suficiente para realizar o depósito!")
 
             else: 
-                print("Saque realizado!")
+                print("\nSaque realizado!")
 
                 withdrawals += f"Saques: R${value:.2f}; "
                 balance -= value
-    else:
-        break
+
+            time.sleep(2)
+
+    elif (choice == 3):
+        print(f"""        MEU EXTRATO 
+              
+        Depósitos realizados: {deposits}
+        Saques realizados: {withdrawals}
+
+        Saldo atual: R${balance:.2f}""")
+    
+        time.sleep(4)
+
+    elif(choice != 4):
+        print("Opção inválida!")
