@@ -64,9 +64,13 @@ while(choice != 4):
             while(value > 500):
                 value = float(input("""\nValor inválido! O limite máximo para saque é de R$500,00! Tente novamente: R$"""))
 
-            print("Saque realizado!")
+            if(value > balance):
+                print("Você não possui saldo suficiente para realizar o depósito!")
 
-            withdrawals += f"Saques: R${value:.2f}; "
-            balance -= value
+            else: 
+                print("Saque realizado!")
+
+                withdrawals += f"Saques: R${value:.2f}; "
+                balance -= value
     else:
         break
