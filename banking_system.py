@@ -55,7 +55,6 @@ while(choice != 4):
         
         else: 
             date_last_withdrawal = date.today()
-            qt_withdrawals += 1
 
             value = float(input("""
             Opção SAQUE selecionada
@@ -71,6 +70,7 @@ while(choice != 4):
             else: 
                 print("\nSaque realizado!")
 
+                qt_withdrawals += 1
                 withdrawals += f"R${value:.2f}; "
                 balance -= value
 
