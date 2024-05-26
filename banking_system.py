@@ -71,7 +71,7 @@ while(choice != 4):
             else: 
                 print("\nSaque realizado!")
 
-                withdrawals += f"Saques: R${value:.2f}; "
+                withdrawals += f"R${value:.2f}; "
                 balance -= value
 
             time.sleep(2)
