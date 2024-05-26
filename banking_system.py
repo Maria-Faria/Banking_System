@@ -35,7 +35,7 @@ while(choice != 4):
         Digite aqui o valor a ser depositado: R$ """))
 
         while(value <= 0):
-            value = float(input("Valor inválido! Tente novamente: R$ "))
+            value = float(input("\nValor inválido! Tente novamente: R$ "))
 
         print("\nDepósito realizado!")
         
