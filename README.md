@@ -12,3 +12,7 @@
 `Depositar`: a função de depósito permite que o usuário realize um depósito em sua conta bancária, contudo, esse valor não deve ser menor ou igual a zero. Caso o usuário informe zero ou um número negativo para a variável _value_, será exibida uma mensagem de erro e um novo valor deverá ser digitado;
 
   ![image](https://github.com/Maria-Faria/Banking_System/assets/114308727/c12d159e-0717-4c5a-925c-5ba5ecc05461)
+
+`Sacar`: a função de saque permite que o usuário realiza um saque em sua conta bancária, com limite de 3 saques diários e valor máximo de R$500,00 por saque. Caso o usuário não possua saldo suficiente para realizar o saque, uma mensagem será exibida e a operação será cancelada;
+
+  ![image](https://github.com/Maria-Faria/Banking_System/assets/114308727/53571834-45b5-4396-b8cf-727795495aa4)
