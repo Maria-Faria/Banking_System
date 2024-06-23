@@ -20,3 +20,7 @@
 `Exibir Extrato`: a função de exibir extrato imprime na tela todos os depósitos e saques realizados pelo usuário, além do saldo atual disponível em sua conta bancária.
 
   ![image](https://github.com/Maria-Faria/Banking_System/assets/114308727/86c9c3a2-62b0-4eb5-ac71-88fcbecd0d0f)
+
+## 📹Demonstração
+  
+  https://github.com/Maria-Faria/Banking_System/assets/114308727/6e84991e-9cbe-4284-9328-629763a26301
