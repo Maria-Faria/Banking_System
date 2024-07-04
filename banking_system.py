@@ -59,9 +59,62 @@ def show_bank_statement(balance, /, *, deposits, withdrawals):
 
         Saldo atual: R${balance:.2f}""")
     
-menu = """
+def create_user(users, name, date_of_birth, cpf, street, number, neighborhood, city, state):
+    while(len(state)> 2):
+        state = input("\nInforme somente a sigla de seu estado: ")
+        
+    #verificar se há somente números no CPF
+    while(cpf.isdigit() == False):
+        cpf = input("\nCPF deve conter apenas números, por favor digite novamente: ")
+
+    #verificar se o CPF já foi cadastrado
+    for user in users:
+        if(not cpf in user):
+            #cadastrar novo usuário
+            new_user = {cpf: {
+                "name": name,
+                "date_of_birth": date_of_birth,
+                "address": f"{street}, {number} - {neighborhood} - {city}/{state}"
+            }}
+            users.append(new_user)
+
+            if(users[0] == {}):
+                users.pop(0)
+
+    return users
+
+users = [{}]
+initial_menu = int(input("""
 Bem vindo(a) ao Snake Bank!
 *****************************************
+
+Você já possui uma conta em nosso banco?
+
+    [1] Sim
+    [2] Não
+
+    => """))
+
+if(initial_menu == 2):
+    print("\nOk, vamos criar sua conta!\n")
+
+    name = input("Digite seu nome: ")
+    date_of_birth = input("Digite sua data de nascimento: ")
+    cpf = input("Digite seu CPF: ")
+    street = input("Digite o nome da rua onde você mora: ")
+    number = input("Digite o número da sua casa: ")
+    neighborhood = input("Digite o nome do bairro onde você mora: ")
+    city = input("Digite o nome da cidade onde você mora: ")
+    state = input("Digite a sigla do estado onde você mora: ")
+
+    create_user(users, name, date_of_birth, cpf, street, number, neighborhood, city, state)
+
+    print("\nParabéns, sua conta foi criada com sucesso!")
+
+    time.sleep(3)
+
+menu = """
+
     Selecione uma opção:
 
     [1] Depositar
@@ -81,6 +134,7 @@ qt_withdrawals = 0
 date_last_withdrawal = ""
 
 balance = 0
+
 
 while(choice != 4):
     choice = int(input(menu))
