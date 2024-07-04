@@ -1,8 +1,21 @@
 from datetime import date
 import time
 
-def deposit():
-    return 0, 1
+def deposit(deposits, balance, /):
+    value = float(input("""
+        Opção DEPÓSITO selecionada
+                      
+        Digite aqui o valor a ser depositado: R$ """))
+
+    while(value <= 0):
+        value = float(input("\nValor inválido! Tente novamente: R$ "))
+
+    print("\nDepósito realizado!")
+        
+    deposits += f"R${value:.2f}; "
+    balance += value
+
+    return deposits, balance
 
 def to_withdraw(*, date_last_withdrawal,balance, value, bank_statement, limit, number_withdraws, limit_withdraws):
 
@@ -38,9 +51,14 @@ def to_withdraw(*, date_last_withdrawal,balance, value, bank_statement, limit, n
 
     return balance, bank_statement, number_withdraws, date_last_withdrawal
 
-def show_bank_statement():
-    return 0
+def show_bank_statement(balance, /, *, deposits, withdrawals):
+    return (f"""        MEU EXTRATO 
+              
+        Depósitos realizados: {deposits}
+        Saques realizados: {withdrawals}
 
+        Saldo atual: R${balance:.2f}""")
+    
 menu = """
 Bem vindo(a) ao Snake Bank!
 *****************************************
@@ -69,19 +87,11 @@ while(choice != 4):
     print(line)
 
     if(choice == 1):
-        value = float(input("""
-        Opção DEPÓSITO selecionada
-                      
-        Digite aqui o valor a ser depositado: R$ """))
-
-        while(value <= 0):
-            value = float(input("\nValor inválido! Tente novamente: R$ "))
-
-        print("\nDepósito realizado!")
-        
-        deposits += f"R${value:.2f}; "
-        balance += value
+        result = deposit(deposits, balance)
     
+        deposits = result[0]
+        balance = result[1]
+
         time.sleep(2)
 
     elif(choice == 2):
@@ -95,12 +105,7 @@ while(choice != 4):
         time.sleep(2)
 
     elif (choice == 3):
-        print(f"""        MEU EXTRATO 
-              
-        Depósitos realizados: {deposits}
-        Saques realizados: {withdrawals}
-
-        Saldo atual: R${balance:.2f}""")
+        print(show_bank_statement(balance, deposits=deposits, withdrawals=withdrawals))    
     
         time.sleep(4)
 
@@ -109,3 +114,4 @@ while(choice != 4):
 
     else:
         print("Opção inválida!")
+        time.sleep(3)
