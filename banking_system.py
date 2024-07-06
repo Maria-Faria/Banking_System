@@ -83,12 +83,65 @@ def create_user(users, name, date_of_birth, cpf, street, number, neighborhood, c
 
     return users
 
-users = [{}]
+def create_account(users, accounts, account_number, cpf_user, agency="0001"):
+    for user in users:
+        if(not cpf in user):
+            print("Usuário não encontrado! Não é possível cadastrar uma conta corrente")
+
+        else:
+            new_account = {cpf_user: {"agency": agency, "account_number": account_number}}
+            accounts.append(new_account)
+
+            if(accounts[0] == {}):
+                accounts.pop(0)
+
+            print("Conta criada com sucesso!")
+
+    return accounts
+
+def show_my_data(users, accounts, cpf):
+    my_accounts = ""
+    user_exists = False
+
+    for user in users:
+        if cpf in user:
+            user_exists = True
+            this_user = user[cpf]
+
+    if(user_exists == False):
+        return "Usuário não encontrado!"
+    
+    else:
+        for account in accounts:
+            if cpf in account:
+                my_accounts += f"{account[cpf]["agency"]}-{account[cpf]["account_number"]}\n"
+
+    return f"""
+        Seus dados:
+
+        CPF: {cpf}
+        Nome: {this_user["name"]}
+        Data de nascimento: {this_user["date_of_birth"]}
+        Endereço: {this_user["address"]}
+
+        >>
+
+        Suas contas:
+
+        {my_accounts}
+
+    """
+
+users = [{"49281656833": {"name": "Maria Eduarda de Faria", "date_of_birth": "15/04/2004", "address": f"R. Joaquim Antonio da Rocha, 222 - Tinga - Caraguatatuba/SP"}}]
+accounts = [{}]
+account_number = 1
+user_data = {}
+
 initial_menu = int(input("""
 Bem vindo(a) ao Snake Bank!
 *****************************************
 
-Você já possui uma conta em nosso banco?
+Você já possui cadastro em nosso banco?
 
     [1] Sim
     [2] Não
@@ -96,7 +149,7 @@ Você já possui uma conta em nosso banco?
     => """))
 
 if(initial_menu == 2):
-    print("\nOk, vamos criar sua conta!\n")
+    print("\nOk, vamos criar seu cadastro!\n")
 
     name = input("Digite seu nome: ")
     date_of_birth = input("Digite sua data de nascimento: ")
@@ -109,18 +162,27 @@ if(initial_menu == 2):
 
     create_user(users, name, date_of_birth, cpf, street, number, neighborhood, city, state)
 
-    print("\nParabéns, sua conta foi criada com sucesso!")
+    print("\nParabéns, seu cadastro foi registrado com sucesso!")
 
-    time.sleep(3)
+    time.sleep(2)
+    
+else:
+    cpf = input("\nDigite seu CPF: ")
+
+    print(show_my_data(users, accounts, cpf))
+    print("**************************************")
+
+time.sleep(4)
 
 menu = """
-
     Selecione uma opção:
 
+    [0] Criar uma conta corrente
     [1] Depositar
     [2] Sacar
     [3] Extrato
-    [4] Sair
+    [4] Visualizar meus dados
+    [5] Sair
 
     => """
 
@@ -136,11 +198,18 @@ date_last_withdrawal = ""
 balance = 0
 
 
-while(choice != 4):
+while(choice != 5):
     choice = int(input(menu))
     print(line)
 
-    if(choice == 1):
+    if(choice == 0):
+        cpf_user = input("Informe seu CPF: ")
+
+        create_account(users, accounts, account_number, cpf_user)
+        account_number += 1
+        time.sleep(2)
+
+    elif(choice == 1):
         result = deposit(deposits, balance)
     
         deposits = result[0]
@@ -163,7 +232,13 @@ while(choice != 4):
     
         time.sleep(4)
 
-    elif (choice == 4):
+    elif(choice == 4):
+        cpf = input("Infome seu cpf: ")
+        print(show_my_data(users, accounts, cpf))
+
+        time.sleep(4)
+
+    elif (choice == 5):
         print("Obrigado por utilizar nosso sistema!")
 
     else:
