@@ -14,6 +14,10 @@ class Client:
     def add_account(self, account):
         self._accounts.append(account)
 
+    @property
+    def accounts(self):
+        return self._accounts
+
 class Physical_Person(Client):
     def __init__(self, cpf, name, birth_date, address, accounts = []):
         self._cpf = cpf
@@ -56,8 +60,8 @@ class Deposit(Transaction):
     def __init__(self, value):
         self._value = value
 
-    def register(account):
-        pass
+    def register(self, account):
+        account.deposit(self._value)
 
 class To_Withdraw(Transaction):
     def __init__(self, value):
@@ -86,11 +90,11 @@ class Account:
     
     @property
     def number(self):
-        return self.number
+        return self._number
 
     @classmethod
     def new_account(cls, client, number):
-        print("\nNova conta cadastrada com sucesso!")
+        print(f"\nNova conta cadastrada com sucesso!\nNúmero da conta: {number}")
         return cls(client, number)
     
     def to_withdraw(self, *, value):
@@ -137,6 +141,7 @@ def check_user_exists(cpf):
     return user_exists, client
 
 clients = [Physical_Person("49281656833", "Maria", "15/04/2004", "R. Joaquim Antonio da Rocha, 222 - Tinga - Caraguatatuba/SP")]
+client = None
 
 ## Iniciando o sistema
 initial_menu = int(input("""
@@ -231,24 +236,31 @@ while(choice != 5):
     print(line)
 
     if(choice == 0):
-        cpf_user = input("Informe seu CPF: ")
-        client = check_user_exists(cpf_user)[1]
-
         account = Current_Account.new_account(client, account_number)
         client.add_account(account)
         account_number += 1
         time.sleep(2)
 
     elif(choice == 1):
-        value = float(input("""
-            Opção DEPÓSITO selecionada
-                      
-            Digite aqui o valor a ser depositado: R$ """))
-        
-        result = deposit(deposits, balance)
-    
-        deposits = result[0]
-        balance = result[1]
+        account = None
+        account_number = int(input("Informe o número da conta na qual deseja realizar o depósito: "))
+
+        for account_client in client.accounts:
+            if(account_number == account_client.number):
+                account = account_client
+
+        if(account != None):
+
+            value = float(input("""
+                Opção DEPÓSITO selecionada
+                        
+                Digite aqui o valor a ser depositado: R$ """))
+
+            deposit = Deposit(value)
+            deposit.register(account)       
+
+        else:
+            print("Conta corrente não encontrada!")
 
         time.sleep(2)
 
@@ -297,20 +309,6 @@ while(choice != 5):
     else:
         print("Opção inválida!")
         time.sleep(3)
-def deposit(deposits, balance, /):
-        
-    deposits += f"R${value:.2f}; "
-    balance += value
-
-    return deposits, balance
-
-"""def to_withdraw(*, date_last_withdrawal,balance, value, bank_statement, limit, number_withdraws, limit_withdraws):
-
-        number_withdraws += 1
-        bank_statement += f"R${value:.2f}; "
-        balance -= value
-
-    return balance, bank_statement, number_withdraws, date_last_withdrawal"""
 
 def show_bank_statement(balance, /, *, deposits, withdrawals):
     return (f"""        MEU EXTRATO 
@@ -319,9 +317,3 @@ def show_bank_statement(balance, /, *, deposits, withdrawals):
         Saques realizados: {withdrawals}
 
         Saldo atual: R${balance:.2f}""")
-
-deposits = ""
-withdrawals = ""
-
-qt_withdrawals = 0
-date_last_withdrawal = ""
