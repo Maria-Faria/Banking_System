@@ -8,8 +8,12 @@ class Client:
         self._address = address
         self._accounts = accounts
 
-    def carry_out_transaction(self, account, transaction):
-        pass
+    def carry_out_transaction(self, account, transaction, number_withdraws = 0):
+        if(transaction.type == 'deposit'):
+            transaction.register(account=account)
+        
+        else:
+            transaction.register(account=account, number_withdraws=number_withdraws)
 
     def add_account(self, account):
         self._accounts.append(account)
@@ -29,7 +33,7 @@ class Physical_Person(Client):
         my_accounts = ""
 
         for account in self._accounts:
-            my_accounts += f"{account.agency}-{account.number}\n"
+            my_accounts += f"{account.agency}-{account.number}\n\t    "
 
         return f"""
             Seus dados:
@@ -44,7 +48,7 @@ class Physical_Person(Client):
             Suas contas:
 
             {my_accounts}
-        """
+            """
     
     @property
     def cpf(self):
@@ -283,90 +287,81 @@ line = "*****************************************"
 choice = -1
 account_number = 1
 
-# Exibindo menu ao usuário
-while(choice != 5):
-    choice = int(input(menu))
-    print(line)
+if(client != None):
+    # Exibindo menu ao usuário
+    while(choice != 5):
+        choice = int(input(menu))
+        print(line)
 
-    if(choice == 0):
-        account = Current_Account.new_account(client, account_number)
-        client.add_account(account)
-        account_number += 1
-        time.sleep(2)
+        if(choice == 0):
+            account = Current_Account.new_account(client, account_number)
+            client.add_account(account)
+            account_number += 1
+            time.sleep(2)
 
-    elif(choice == 1):
-        account = None
-        account_number = int(input("Informe o número da conta na qual deseja realizar o depósito: "))
+        elif(choice == 1):
+            account = None
+            account_number = int(input("Informe o número da conta na qual deseja realizar o depósito: "))
 
-        account = search_account(client)
+            account = search_account(client)
 
-        if(account != None):
-            value = float(input("""
-                Opção DEPÓSITO selecionada
-                        
-                Digite aqui o valor a ser depositado: R$ """))
+            if(account != None):
+                value = float(input("""
+                    Opção DEPÓSITO selecionada
+                            
+                    Digite aqui o valor a ser depositado: R$ """))
 
-            deposit = Deposit(value)
-            deposit.register(account)       
+                deposit = Deposit(value)
+                client.carry_out_transaction(account, deposit)
+
+            else:
+                print("Conta corrente não encontrada!")
+
+            time.sleep(2)
+
+        elif(choice == 2):
+            account = None
+            account_number = int(input("Informe o número da conta na qual deseja realizar o saque: "))
+
+            account = search_account(client)
+
+            if(account != None):
+
+                value = float(input("""
+                    Opção SAQUE selecionada
+                                    
+                    Digite aqui o valor a ser sacado: R$"""))
+                
+                to_withdraw = To_Withdraw(value)
+                client.carry_out_transaction(account, to_withdraw)
+                number_withdraws += 1
+                
+            else:
+                print("Conta corrente não encontrada!")
+
+            time.sleep(2)
+
+        elif (choice == 3):
+            account = None
+            account_number = int(input("Informe o número da conta da qual deseja visualizar o extrato: "))
+
+            account = search_account(client)
+
+            if(account != None):
+                print(account.historic)
+
+            else:
+                print("Conta corrente não econtrada!")
+
+            time.sleep(4)
+
+        elif(choice == 4):
+            print(client.show_my_data())
+            time.sleep(4)
+
+        elif (choice == 5):
+            print("Obrigado por utilizar nosso sistema!")
 
         else:
-            print("Conta corrente não encontrada!")
-
-        time.sleep(2)
-
-    elif(choice == 2):
-        account = None
-        account_number = int(input("Informe o número da conta na qual deseja realizar o saque: "))
-
-        account = search_account(client)
-
-        if(account != None):
-
-            value = float(input("""
-                Opção SAQUE selecionada
-                                
-                Digite aqui o valor a ser sacado: R$"""))
-            
-            to_withdraw = To_Withdraw(value)
-            to_withdraw.register(account=account, number_withdraws=number_withdraws)
-            number_withdraws += 1
-            
-        else:
-            print("Conta corrente não encontrada!")
-
-        time.sleep(2)
-
-    elif (choice == 3):
-        account = None
-        account_number = int(input("Informe o número da conta da qual deseja visualizar o extrato: "))
-
-        account = search_account(client)
-
-        if(account != None):
-            print(account.historic)
-
-        else:
-            print("Conta corrente não econtrada!")
-
-        time.sleep(4)
-
-    elif(choice == 4):
-        cpf = input("Infome seu cpf: ")
-        print(show_my_data(users, accounts, cpf))
-
-        time.sleep(4)
-
-    elif (choice == 5):
-        print("Obrigado por utilizar nosso sistema!")
-
-    else:
-        print("Opção inválida!")
-        time.sleep(3)
-
-def show_bank_statement(balance, /, *, deposits, withdrawals):
-    return (f"""        MEU EXTRATO 
-              
-        Depósitos realizados: {deposits}
-        Saques realizados: {withdrawals}
-
-        Saldo atual: R${balance:.2f}""")
+            print("Opção inválida!")
+            time.sleep(3)
