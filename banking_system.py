@@ -66,8 +66,10 @@ class Deposit(Transaction):
 class To_Withdraw(Transaction):
     def __init__(self, value):
         self._value = value
-    def register(account):
-        pass
+
+    def register(self, account, number_withdraws):
+        account.to_withdraw(value = self._value, number_withdraws = number_withdraws)
+
 ## CLASSE HISTÓRICO
 class Historic:
     def add_transation(self, transation):
@@ -114,6 +116,7 @@ class Account:
         while(value <= 0):
             value = float(input("\nValor inválido! Tente novamente: R$ "))
 
+        self._balance += value
         print("\nDepósito realizado!")
 
         return True
@@ -125,8 +128,15 @@ class Current_Account(Account):
     def __init__(self, client, number, limit = 500, withdrawal_limit = 3, agency = "0001", balance = 0, historic = None):
         super().__init__(client, number, agency, balance, historic)
         self._limit = limit
-        self._withdawal_limit = withdrawal_limit
+        self._withdrawal_limit = withdrawal_limit
 
+    def to_withdraw(self, *, value, number_withdraws):
+        if(number_withdraws == self._withdrawal_limit):
+            print(f"\nVocê atingiu seu limite de {self._withdrawal_limit} saques diários!")
+            time.sleep(3)
+        
+        else:
+            super().to_withdraw(value=value)
 ## Testando...
 
 def check_user_exists(cpf):
@@ -140,8 +150,18 @@ def check_user_exists(cpf):
 
     return user_exists, client
 
+def search_account(client):
+    for account_client in client.accounts:
+        if(account_number == account_client.number):
+            account = account_client
+            return account
+        
+    return None
+
 clients = [Physical_Person("49281656833", "Maria", "15/04/2004", "R. Joaquim Antonio da Rocha, 222 - Tinga - Caraguatatuba/SP")]
 client = None
+
+number_withdraws = 0
 
 ## Iniciando o sistema
 initial_menu = int(input("""
@@ -245,9 +265,7 @@ while(choice != 5):
         account = None
         account_number = int(input("Informe o número da conta na qual deseja realizar o depósito: "))
 
-        for account_client in client.accounts:
-            if(account_number == account_client.number):
-                account = account_client
+        account = search_account(client)
 
         if(account != None):
 
@@ -265,30 +283,24 @@ while(choice != 5):
         time.sleep(2)
 
     elif(choice == 2):
-        if(date_last_withdrawal != date.today()):
-            number_withdraws = 0
+        account = None
+        account_number = int(input("Informe o número da conta na qual deseja realizar o saque: "))
 
-        if(number_withdraws == 3 and date_last_withdrawal == date.today()):
-            print("Você atingiu seu limite de 3 aques diários!")
-            time.sleep(3)
-        
-        else: 
-            date_last_withdrawal = date.today()
+        account = search_account(client)
+
+        if(account != None):
 
             value = float(input("""
-            Opção SAQUE selecionada
-                            
-            Digite aqui o valor a ser sacado: R$"""))
-
-            time.sleep(2)
-
-        ## CHAMAR A FUNÇÃO DE SAQUE
-        result = to_withdraw(date_last_withdrawal=date_last_withdrawal,balance=balance, value=0, bank_statement=withdrawals, limit=500, number_withdraws=qt_withdrawals, limit_withdraws=3)
-
-        balance = result[0]
-        withdrawals = result[1]
-        qt_withdrawals = result[2]
-        date_last_withdrawal = result[3]
+                Opção SAQUE selecionada
+                                
+                Digite aqui o valor a ser sacado: R$"""))
+            
+            to_withdraw = To_Withdraw(value)
+            to_withdraw.register(account=account, number_withdraws=number_withdraws)
+            number_withdraws += 1
+            
+        else:
+            print("Conta corrente não encontrada!")
 
         time.sleep(2)
 
