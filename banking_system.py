@@ -57,28 +57,53 @@ class Transaction(ABC):
         pass
 
 class Deposit(Transaction):
-    def __init__(self, value):
+    def __init__(self, value, type = "deposit"):
         self._value = value
+        self._type = type
 
+    @property
+    def type(self):
+        return self._type
+    
+    @property
+    def value(self):
+        return self._value
     def register(self, account):
-        account.deposit(self._value)
+        account.deposit(self._value, self)
 
 class To_Withdraw(Transaction):
-    def __init__(self, value):
+    def __init__(self, value, type = "withdraw"):
         self._value = value
+        self._type = type
 
+    @property
+    def type(self):
+        return self._type
+    
+    @property
+    def value(self):
+        return self._value
+    
     def register(self, account, number_withdraws):
-        account.to_withdraw(value = self._value, number_withdraws = number_withdraws)
+        account.to_withdraw(value = self._value, number_withdraws = number_withdraws, transaction = self)
 
 ## CLASSE HISTÓRICO
 class Historic:
+    def __init__(self, content = ""):
+        self._content = content
+
     def add_transation(self, transation):
-        pass
+        signal = "-" if transation.type == "withdraw" else "+" 
+        self._content += f"{signal} R${transation.value:.2f}\n"
+
+    @property
+    def content(self):
+        return self._content
 ## CLASSE CONTA
 class Account:
-    def __init__(self, client, number, agency = "0001", balance = 0, historic = None):
+    def __init__(self, client, number, agency = "0001", balance = 0):
         self._balance = balance
-        self._historic = historic
+        self._historic = Historic()
         self._client = client
         self._number = number
         self._agency = agency
@@ -88,7 +113,7 @@ class Account:
     
     @property
     def agency(self):
-        return self.agency
+        return self._agency
     
     @property
     def number(self):
@@ -99,7 +124,7 @@ class Account:
         print(f"\nNova conta cadastrada com sucesso!\nNúmero da conta: {number}")
         return cls(client, number)
     
-    def to_withdraw(self, *, value):
+    def to_withdraw(self, *, value, transaction):
         while(value > 500 or value < 0):
             value = float(input("""\nValor inválido! O limite máximo para saque é de R$500,00 e o valor mínimo é de R$1,00! Tente novamente: R$"""))
 
@@ -109,34 +134,42 @@ class Account:
 
         else: 
             self._balance -= value
+            self._historic.add_transation(transaction)
             print("\nSaque realizado!")
             return True
         
-    def deposit(self, value, /):
+    def deposit(self, value, transaction, /):
         while(value <= 0):
             value = float(input("\nValor inválido! Tente novamente: R$ "))
 
         self._balance += value
+        self._historic.add_transation(transaction)
         print("\nDepósito realizado!")
 
         return True
+    
+    @property
+    def historic(self):
+        print(f"\nExtrato da conta {self.agency}-{self.number}")
+        print("----------------------------------")
+        return self._historic.content + f"\n\nSaldo disponível: R${self.balance:.2f}"
     
     def __str__(self):
         return f"Cliente: {self._client} - Conta: {self._agency}-{self._number}"
     
 class Current_Account(Account):
-    def __init__(self, client, number, limit = 500, withdrawal_limit = 3, agency = "0001", balance = 0, historic = None):
-        super().__init__(client, number, agency, balance, historic)
+    def __init__(self, client, number, limit = 500, withdrawal_limit = 3, agency = "0001", balance = 0):
+        super().__init__(client, number, agency, balance)
         self._limit = limit
         self._withdrawal_limit = withdrawal_limit
 
-    def to_withdraw(self, *, value, number_withdraws):
+    def to_withdraw(self, *, value, number_withdraws, transaction):
         if(number_withdraws == self._withdrawal_limit):
             print(f"\nVocê atingiu seu limite de {self._withdrawal_limit} saques diários!")
             time.sleep(3)
         
         else:
-            super().to_withdraw(value=value)
+            super().to_withdraw(value=value, transaction=transaction)
 ## Testando...
 
 def check_user_exists(cpf):
@@ -268,7 +301,6 @@ while(choice != 5):
         account = search_account(client)
 
         if(account != None):
-
             value = float(input("""
                 Opção DEPÓSITO selecionada
                         
@@ -305,8 +337,17 @@ while(choice != 5):
         time.sleep(2)
 
     elif (choice == 3):
-        print(show_bank_statement(balance, deposits=deposits, withdrawals=withdrawals))    
-    
+        account = None
+        account_number = int(input("Informe o número da conta da qual deseja visualizar o extrato: "))
+
+        account = search_account(client)
+
+        if(account != None):
+            print(account.historic)
+
+        else:
+            print("Conta corrente não econtrada!")
+
         time.sleep(4)
 
     elif(choice == 4):
