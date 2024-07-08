@@ -11,8 +11,8 @@ class Client:
     def carry_out_transaction(self, account, transaction):
         pass
 
-    def add_account(account):
-        pass
+    def add_account(self, account):
+        self._accounts.append(account)
 
 class Physical_Person(Client):
     def __init__(self, cpf, name, birth_date, address, accounts = []):
@@ -23,6 +23,9 @@ class Physical_Person(Client):
 
     def show_my_data(self):
         my_accounts = ""
+
+        for account in self._accounts:
+            my_accounts += f"{account.agency}-{account.number}\n"
 
         return f"""
             Seus dados:
@@ -36,7 +39,7 @@ class Physical_Person(Client):
 
             Suas contas:
 
-            {self._accounts}
+            {my_accounts}
         """
     
     @property
@@ -76,9 +79,18 @@ class Account:
     @property
     def balance(self):
         return self._balance
+    
+    @property
+    def agency(self):
+        return self.agency
+    
+    @property
+    def number(self):
+        return self.number
 
     @classmethod
     def new_account(cls, client, number):
+        print("\nNova conta cadastrada com sucesso!")
         return cls(client, number)
     
     def to_withdraw(self, *, value):
@@ -101,6 +113,9 @@ class Account:
         print("\nDepósito realizado!")
 
         return True
+    
+    def __str__(self):
+        return f"Cliente: {self._client} - Conta: {self._agency}-{self._number}"
     
 class Current_Account(Account):
     def __init__(self, client, number, limit = 500, withdrawal_limit = 3, agency = "0001", balance = 0, historic = None):
@@ -194,51 +209,6 @@ else:
 print("**************************************")
 time.sleep(4)
 
-
-def deposit(deposits, balance, /):
-        
-    deposits += f"R${value:.2f}; "
-    balance += value
-
-    return deposits, balance
-
-"""def to_withdraw(*, date_last_withdrawal,balance, value, bank_statement, limit, number_withdraws, limit_withdraws):
-
-        number_withdraws += 1
-        bank_statement += f"R${value:.2f}; "
-        balance -= value
-
-    return balance, bank_statement, number_withdraws, date_last_withdrawal"""
-
-def show_bank_statement(balance, /, *, deposits, withdrawals):
-    return (f"""        MEU EXTRATO 
-              
-        Depósitos realizados: {deposits}
-        Saques realizados: {withdrawals}
-
-        Saldo atual: R${balance:.2f}""")
-
-def create_account(users, accounts, account_number, cpf_user, agency="0001"):
-    for user in users:
-        if(not cpf in user):
-            print("Usuário não encontrado! Não é possível cadastrar uma conta corrente")
-
-        else:
-            new_account = {cpf_user: {"agency": agency, "account_number": account_number}}
-            accounts.append(new_account)
-
-            if(accounts[0] == {}):
-                accounts.pop(0)
-
-            print("Conta criada com sucesso!")
-
-    return accounts
-
-users = [{"49281656833": {"name": "Maria Eduarda de Faria", "date_of_birth": "15/04/2004", "address": f"R. Joaquim Antonio da Rocha, 222 - Tinga - Caraguatatuba/SP"}}]
-accounts = [{}]
-account_number = 1
-user_data = {}
-
 menu = """
     Selecione uma opção:
 
@@ -252,25 +222,20 @@ menu = """
     => """
 
 line = "*****************************************"
-choice = 0
+choice = -1
+account_number = 1
 
-deposits = ""
-withdrawals = ""
-
-qt_withdrawals = 0
-date_last_withdrawal = ""
-
-balance = 0
-
-
+# Exibindo menu ao usuário
 while(choice != 5):
     choice = int(input(menu))
     print(line)
 
     if(choice == 0):
         cpf_user = input("Informe seu CPF: ")
+        client = check_user_exists(cpf_user)[1]
 
-        create_account(users, accounts, account_number, cpf_user)
+        account = Current_Account.new_account(client, account_number)
+        client.add_account(account)
         account_number += 1
         time.sleep(2)
 
@@ -332,3 +297,31 @@ while(choice != 5):
     else:
         print("Opção inválida!")
         time.sleep(3)
+def deposit(deposits, balance, /):
+        
+    deposits += f"R${value:.2f}; "
+    balance += value
+
+    return deposits, balance
+
+"""def to_withdraw(*, date_last_withdrawal,balance, value, bank_statement, limit, number_withdraws, limit_withdraws):
+
+        number_withdraws += 1
+        bank_statement += f"R${value:.2f}; "
+        balance -= value
+
+    return balance, bank_statement, number_withdraws, date_last_withdrawal"""
+
+def show_bank_statement(balance, /, *, deposits, withdrawals):
+    return (f"""        MEU EXTRATO 
+              
+        Depósitos realizados: {deposits}
+        Saques realizados: {withdrawals}
+
+        Saldo atual: R${balance:.2f}""")
+
+deposits = ""
+withdrawals = ""
+
+qt_withdrawals = 0
+date_last_withdrawal = ""
