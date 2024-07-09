@@ -109,11 +109,11 @@ class Historic:
         self._transactions = []
 
     def add_transation(self, transaction):
-        if((transaction.date == date_now) and (transaction.type == "withdraw")):
+        if((transaction.date.strftime('%d/%m/%Y') == date_now.strftime('%d/%m/%Y')) and (transaction.type == "withdraw")):
             self._transactions.append(transaction)
 
         signal = "-" if transaction.type == "withdraw" else "+" 
-        self._content += f"{signal} R${transaction.value:.2f} ...... {transaction.date}\n"
+        self._content += f"{signal} R${transaction.value:.2f} ...... {transaction.date.strftime('%d/%m/%Y %H:%M')}\n"
 
     @property
     def content(self):
@@ -146,7 +146,7 @@ class Account:
     #decorador de logs
     def log_transaction(func):
         def show_date(*args, **kwargs):
-            print(f"\nData da operação: {date_now}")
+            print(f"\nData da operação: {date_now.strftime('%d/%m/%Y')}")
             return func(*args, **kwargs)
 
         return show_date
@@ -227,7 +227,7 @@ clients = [Physical_Person("49281656833", "Maria", "15/04/2004", "R. Joaquim Ant
 client = None
 
 number_withdraws = 0
-date_now = datetime.utcnow().date()
+date_now = datetime.now()
 
 ## Iniciando o sistema
 initial_menu = int(input("""
@@ -340,7 +340,7 @@ if(client != None):
                             
                     Digite aqui o valor a ser depositado: R$ """))
 
-                deposit = Deposit(value, date_now)
+                deposit = Deposit(value, datetime.now())
                 client.carry_out_transaction(account, deposit)
 
             else:
@@ -361,7 +361,7 @@ if(client != None):
                                     
                     Digite aqui o valor a ser sacado: R$"""))
                 
-                to_withdraw = To_Withdraw(value, date_now)
+                to_withdraw = To_Withdraw(value, datetime.now())
                 client.carry_out_transaction(account, to_withdraw)
                 number_withdraws += 1
                 
