@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from abc import ABC, abstractmethod
 import time
 
@@ -33,7 +33,7 @@ class Physical_Person(Client):
         my_accounts = ""
 
         for account in self._accounts:
-            my_accounts += f"{account.agency}-{account.number}\n\t    "
+            my_accounts += f"{account.agency}-{account.number} . . . . Saldo disponível: R${account.balance:.2f}\n\t    "
 
         return f"""
             Seus dados:
@@ -61,9 +61,10 @@ class Transaction(ABC):
         pass
 
 class Deposit(Transaction):
-    def __init__(self, value, type = "deposit"):
+    def __init__(self, value, date, type = "deposit"):
         self._value = value
         self._type = type
+        self._date = date
 
     @property
     def type(self):
@@ -72,13 +73,19 @@ class Deposit(Transaction):
     @property
     def value(self):
         return self._value
+    
+    @property
+    def date(self):
+        return self._date
+    
     def register(self, account):
         account.deposit(self._value, self)
 
 class To_Withdraw(Transaction):
-    def __init__(self, value, type = "withdraw"):
+    def __init__(self, value, date, type = "withdraw"):
         self._value = value
         self._type = type
+        self._date = date
 
     @property
     def type(self):
@@ -87,6 +94,10 @@ class To_Withdraw(Transaction):
     @property
     def value(self):
         return self._value
+    
+    @property
+    def date(self):
+        return self._date
     
     def register(self, account, number_withdraws):
         account.to_withdraw(value = self._value, number_withdraws = number_withdraws, transaction = self)
@@ -95,14 +106,23 @@ class To_Withdraw(Transaction):
 class Historic:
     def __init__(self, content = ""):
         self._content = content
+        self._transactions = []
 
-    def add_transation(self, transation):
-        signal = "-" if transation.type == "withdraw" else "+" 
-        self._content += f"{signal} R${transation.value:.2f}\n"
+    def add_transation(self, transaction):
+        if((transaction.date == date_now) and (transaction.type == "withdraw")):
+            self._transactions.append(transaction)
+
+        signal = "-" if transaction.type == "withdraw" else "+" 
+        self._content += f"{signal} R${transaction.value:.2f} ...... {transaction.date}\n"
 
     @property
     def content(self):
         return self._content
+    
+    @property
+    def transactions(self):
+        return self._transactions
+    
 ## CLASSE CONTA
 class Account:
     def __init__(self, client, number, agency = "0001", balance = 0):
@@ -122,12 +142,22 @@ class Account:
     @property
     def number(self):
         return self._number
+    
+    #decorador de logs
+    def log_transaction(func):
+        def show_date(*args, **kwargs):
+            print(f"\nData da operação: {date_now}")
+            return func(*args, **kwargs)
+
+        return show_date
 
     @classmethod
+    @log_transaction
     def new_account(cls, client, number):
-        print(f"\nNova conta cadastrada com sucesso!\nNúmero da conta: {number}")
+        print(f"Nova conta cadastrada com sucesso!\nNúmero da conta: {number}")
         return cls(client, number)
     
+    @log_transaction
     def to_withdraw(self, *, value, transaction):
         while(value > 500 or value < 0):
             value = float(input("""\nValor inválido! O limite máximo para saque é de R$500,00 e o valor mínimo é de R$1,00! Tente novamente: R$"""))
@@ -139,16 +169,17 @@ class Account:
         else: 
             self._balance -= value
             self._historic.add_transation(transaction)
-            print("\nSaque realizado!")
+            print("Saque realizado!")
             return True
         
+    @log_transaction
     def deposit(self, value, transaction, /):
         while(value <= 0):
             value = float(input("\nValor inválido! Tente novamente: R$ "))
 
         self._balance += value
         self._historic.add_transation(transaction)
-        print("\nDepósito realizado!")
+        print("Depósito realizado com sucesso!")
 
         return True
     
@@ -157,10 +188,7 @@ class Account:
         print(f"\nExtrato da conta {self.agency}-{self.number}")
         print("----------------------------------")
         return self._historic.content + f"\n\nSaldo disponível: R${self.balance:.2f}"
-    
-    def __str__(self):
-        return f"Cliente: {self._client} - Conta: {self._agency}-{self._number}"
-    
+        
 class Current_Account(Account):
     def __init__(self, client, number, limit = 500, withdrawal_limit = 3, agency = "0001", balance = 0):
         super().__init__(client, number, agency, balance)
@@ -168,7 +196,7 @@ class Current_Account(Account):
         self._withdrawal_limit = withdrawal_limit
 
     def to_withdraw(self, *, value, number_withdraws, transaction):
-        if(number_withdraws == self._withdrawal_limit):
+        if(len(self._historic.transactions) == self._withdrawal_limit):
             print(f"\nVocê atingiu seu limite de {self._withdrawal_limit} saques diários!")
             time.sleep(3)
         
@@ -199,6 +227,7 @@ clients = [Physical_Person("49281656833", "Maria", "15/04/2004", "R. Joaquim Ant
 client = None
 
 number_withdraws = 0
+date_now = datetime.utcnow().date()
 
 ## Iniciando o sistema
 initial_menu = int(input("""
@@ -311,7 +340,7 @@ if(client != None):
                             
                     Digite aqui o valor a ser depositado: R$ """))
 
-                deposit = Deposit(value)
+                deposit = Deposit(value, date_now)
                 client.carry_out_transaction(account, deposit)
 
             else:
@@ -332,7 +361,7 @@ if(client != None):
                                     
                     Digite aqui o valor a ser sacado: R$"""))
                 
-                to_withdraw = To_Withdraw(value)
+                to_withdraw = To_Withdraw(value, date_now)
                 client.carry_out_transaction(account, to_withdraw)
                 number_withdraws += 1
                 
