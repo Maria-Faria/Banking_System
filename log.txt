@@ -1,0 +1,36 @@
+
+*************************************
+Data da operação: 13/07/2024 12:35
+Operação realizada: Criação de conta
+Dados do cliente: 
+        CPF: 49281656833
+        Nome: Maria
+        Data de nascimento: 15/04/2004
+        Endereço: R. Joaquim Antonio da Rocha, 222 - Tinga - Caraguatatuba/SP
+        
+Número da conta criada: 1
+
+
+*************************************
+Data da operação: 13/07/2024 12:35
+Operação realizada: Depósito
+Valor depositado: R$100.00
+
+*************************************
+Data da operação: 13/07/2024 12:37
+Operação realizada: Criação de conta
+Dados do cliente: 
+        CPF: 49281656833
+        Nome: Maria
+        Data de nascimento: 15/04/2004
+        Endereço: R. Joaquim Antonio da Rocha, 222 - Tinga - Caraguatatuba/SP
+        
+Número da conta criada: 1
+*************************************
+Data da operação: 13/07/2024 12:37
+Operação realizada: Depósito
+Valor depositado: R$150.00
+*************************************
+Data da operação: 13/07/2024 12:37
+Operação realizada: Saque
+Valor sacado: R$100.00

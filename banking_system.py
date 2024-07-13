@@ -1,5 +1,6 @@
 from datetime import datetime
 from abc import ABC, abstractmethod
+from pathlib import Path
 import time
 
 ## CLASSE CLIENTE
@@ -8,12 +9,12 @@ class Client:
         self._address = address
         self._accounts = accounts
 
-    def carry_out_transaction(self, account, transaction, number_withdraws = 0):
+    def carry_out_transaction(self, account, transaction, operation, number_withdraws = 0):
         if(transaction.type == 'deposit'):
-            transaction.register(account=account)
+            transaction.register(account=account, operation=operation)
         
         else:
-            transaction.register(account=account, number_withdraws=number_withdraws)
+            transaction.register(account=account, number_withdraws=number_withdraws, operation=operation)
 
     def add_account(self, account):
         self._accounts.append(account)
@@ -21,6 +22,7 @@ class Client:
     @property
     def accounts(self):
         return self._accounts
+
 
 class Physical_Person(Client):
     def __init__(self, cpf, name, birth_date, address, accounts = []):
@@ -53,6 +55,14 @@ class Physical_Person(Client):
     @property
     def cpf(self):
         return self._cpf
+    
+    def __str__(self):
+        return f"""
+        CPF: {self._cpf}
+        Nome: {self._name}
+        Data de nascimento: {self._birth_date}
+        Endereço: {self._address}
+        """
 
 ## CLASSE TRANSAÇÃO
 class Transaction(ABC):
@@ -78,8 +88,8 @@ class Deposit(Transaction):
     def date(self):
         return self._date
     
-    def register(self, account):
-        account.deposit(self._value, self)
+    def register(self, account, operation):
+        account.deposit(self._value, self, operation=operation)
 
 class To_Withdraw(Transaction):
     def __init__(self, value, date, type = "withdraw"):
@@ -99,8 +109,8 @@ class To_Withdraw(Transaction):
     def date(self):
         return self._date
     
-    def register(self, account, number_withdraws):
-        account.to_withdraw(value = self._value, number_withdraws = number_withdraws, transaction = self)
+    def register(self, account, operation, number_withdraws):
+        account.to_withdraw(value = self._value, number_withdraws = number_withdraws, transaction = self, operation = operation)
 
 ## CLASSE HISTÓRICO
 class Historic:
@@ -145,7 +155,25 @@ class Account:
     
     #decorador de logs
     def log_transaction(func):
+        ROOT_PATH = Path(__file__).parent
         def show_date(*args, **kwargs):
+            file = open(ROOT_PATH / "log.txt", "a", encoding="utf-8")
+            file.write("*************************************\n")
+
+            file.write(f"Data da operação: {date_now.strftime('%d/%m/%Y %H:%M')}\n")
+            file.write(f"Operação realizada: {kwargs['operation']}\n")
+
+            if(kwargs['operation'] == "Criação de conta"):
+                file.write(f"Dados do cliente: {args[1]}\n")
+                file.write(f"Número da conta criada: {args[2]}\n")
+
+            elif(kwargs['operation'] == "Depósito"):
+                file.write(f"Valor depositado: R${args[1]:.2f}\n")
+
+            else:
+                file.write(f"Valor sacado: R${kwargs['value']:.2f}\n")
+
+            file.close()
             print(f"\nData da operação: {date_now.strftime('%d/%m/%Y')}")
             return func(*args, **kwargs)
 
@@ -153,12 +181,12 @@ class Account:
 
     @classmethod
     @log_transaction
-    def new_account(cls, client, number):
+    def new_account(cls, client, number, operation):
         print(f"Nova conta cadastrada com sucesso!\nNúmero da conta: {number}")
         return cls(client, number)
     
     @log_transaction
-    def to_withdraw(self, *, value, transaction):
+    def to_withdraw(self, *, value, transaction, operation):
         while(value > 500 or value < 0):
             value = float(input("""\nValor inválido! O limite máximo para saque é de R$500,00 e o valor mínimo é de R$1,00! Tente novamente: R$"""))
 
@@ -173,7 +201,7 @@ class Account:
             return True
         
     @log_transaction
-    def deposit(self, value, transaction, /):
+    def deposit(self, value, transaction, /, operation):
         while(value <= 0):
             value = float(input("\nValor inválido! Tente novamente: R$ "))
 
@@ -195,13 +223,19 @@ class Current_Account(Account):
         self._limit = limit
         self._withdrawal_limit = withdrawal_limit
 
-    def to_withdraw(self, *, value, number_withdraws, transaction):
+    def to_withdraw(self, *, value, number_withdraws, transaction, operation):
         if(len(self._historic.transactions) == self._withdrawal_limit):
             print(f"\nVocê atingiu seu limite de {self._withdrawal_limit} saques diários!")
             time.sleep(3)
         
         else:
-            super().to_withdraw(value=value, transaction=transaction)
+            super().to_withdraw(value=value, transaction=transaction, operation=operation)
+
+    def __str__(self):
+        print(self._client)
+        return f"""
+        CPF do cliente: {self._client.cpf}
+        """
 ## Testando...
 
 def check_user_exists(cpf):
@@ -323,7 +357,7 @@ if(client != None):
         print(line)
 
         if(choice == 0):
-            account = Current_Account.new_account(client, account_number)
+            account = Current_Account.new_account(client, account_number, operation="Criação de conta")
             client.add_account(account)
             account_number += 1
             time.sleep(2)
@@ -341,7 +375,7 @@ if(client != None):
                     Digite aqui o valor a ser depositado: R$ """))
 
                 deposit = Deposit(value, datetime.now())
-                client.carry_out_transaction(account, deposit)
+                client.carry_out_transaction(account, deposit, operation="Depósito")
 
             else:
                 print("Conta corrente não encontrada!")
@@ -362,7 +396,7 @@ if(client != None):
                     Digite aqui o valor a ser sacado: R$"""))
                 
                 to_withdraw = To_Withdraw(value, datetime.now())
-                client.carry_out_transaction(account, to_withdraw)
+                client.carry_out_transaction(account, to_withdraw, operation="Saque")
                 number_withdraws += 1
                 
             else:
